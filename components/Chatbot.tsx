@@ -22,6 +22,7 @@ const Chatbot: React.FC = () => {
   ])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -38,6 +39,48 @@ const Chatbot: React.FC = () => {
       inputRef.current.focus()
     }
   }, [])
+
+  // Send current URL to backend when chatbot first renders
+  useEffect(() => {
+    if (!isInitialized) {
+      sendCurrentUrlToBackend()
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
+
+  const sendCurrentUrlToBackend = async () => {
+    try {
+      const currentUrl = window.location.href
+      const currentPath = window.location.pathname
+      const currentHost = window.location.hostname
+      
+      const urlData = {
+        fullUrl: currentUrl,
+        path: currentPath,
+        hostname: currentHost,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || null
+      }
+
+      // Send to your backend endpoint
+      const response = await fetch('/api/chatbot/url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(urlData)
+      })
+
+      if (response.ok) {
+        console.log('URL sent to backend successfully')
+      } else {
+        console.error('Failed to send URL to backend')
+      }
+    } catch (error) {
+      console.error('Error sending URL to backend:', error)
+    }
+  }
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
