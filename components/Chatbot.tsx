@@ -12,18 +12,27 @@ interface Message {
   timestamp: Date
 }
 
+interface PriceData {
+  currency: string
+  price: string
+  sku: string
+  success: boolean
+  title: string
+  variant_id: string
+}
+
+interface BackendResponse {
+  price_data: PriceData
+  product_handle: string
+  success: boolean
+}
+
 const Chatbot: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: '👋 Hello! Welcome! I\'m here to help you with any questions.',
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [priceData, setPriceData] = useState<PriceData | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -41,13 +50,26 @@ const Chatbot: React.FC = () => {
     }
   }, [])
 
-  // Send current URL to custom backend when chatbot first renders
+  // Send current URL to custom backend and get price data when chatbot first renders
   useEffect(() => {
     if (!isInitialized) {
       sendCurrentUrlToBackend()
       setIsInitialized(true)
     }
   }, [isInitialized])
+
+  // Update welcome message when price data is received
+  useEffect(() => {
+    if (priceData && messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: '1',
+        text: `THANK YOU, this price is $${priceData.price}, but considering you are here chatting to me, I have done discount available for you, what do you say?`,
+        sender: 'bot',
+        timestamp: new Date()
+      }
+      setMessages([welcomeMessage])
+    }
+  }, [priceData, messages.length])
 
   const sendCurrentUrlToBackend = async () => {
     try {
@@ -73,11 +95,29 @@ const Chatbot: React.FC = () => {
 
       if (response.status === 200) {
         console.log('URL sent to custom backend successfully')
+        
+        // Extract price data from response
+        const backendResponse: BackendResponse = response.data
+        if (backendResponse.success && backendResponse.price_data) {
+          setPriceData(backendResponse.price_data)
+          console.log('Price data received:', backendResponse.price_data)
+        }
       } else {
         console.error('Failed to send URL to custom backend')
       }
     } catch (error) {
       console.error('Error sending URL to custom backend:', error)
+      
+      // Fallback welcome message if backend fails
+      if (messages.length === 0) {
+        const fallbackMessage: Message = {
+          id: '1',
+          text: '👋 Hello! Welcome! I\'m here to help you with any questions.',
+          sender: 'bot',
+          timestamp: new Date()
+        }
+        setMessages([fallbackMessage])
+      }
     }
   }
 
