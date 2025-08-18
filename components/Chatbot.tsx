@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageCircle, X, Send, Gift, Percent, ShoppingBag, User, Bot } from 'lucide-react'
+import { X, Send, Gift, Percent, ShoppingBag, User, Bot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Message {
@@ -12,7 +12,6 @@ interface Message {
 }
 
 const Chatbot: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -36,7 +35,7 @@ const Chatbot: React.FC = () => {
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -47,10 +46,10 @@ const Chatbot: React.FC = () => {
   }, [messages])
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (inputRef.current) {
       inputRef.current.focus()
     }
-  }, [isOpen])
+  }, [])
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
@@ -116,140 +115,116 @@ const Chatbot: React.FC = () => {
     }
   }
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen)
-  }
-
   return (
     <>
-      {/* Floating Chat Button */}
-      <button
-        onClick={toggleChat}
-        className={cn(
-          'floating-chat-button',
-          isOpen && 'hidden'
-        )}
-        aria-label="Open chat"
-      >
-        <MessageCircle className="w-8 h-8" />
-      </button>
-
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="chat-window animate-bounce-in flex flex-col">
-          {/* Chat Header */}
-          <div className="chat-header flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <ShoppingBag className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Store Assistant</h3>
-                  <p className="text-sm text-white/90">Online • Available</p>
-                </div>
+      {/* Chat Window - Always Visible with Specific Dimensions */}
+      <div className="chat-window flex flex-col">
+        {/* Chat Header */}
+        <div className="chat-header flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <ShoppingBag className="w-6 h-6 text-white" />
               </div>
-              <button
-                onClick={toggleChat}
-                className="text-white/80 hover:text-white transition-colors"
-                aria-label="Close chat"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-
-          {/* Chat Body */}
-          <div className="chat-body flex-1 overflow-y-auto">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  'chat-message animate-slide-up',
-                  message.sender === 'user' ? 'user' : 'bot'
-                )}
-              >
-                <div className="flex items-start space-x-2">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
-                    {message.sender === 'user' ? (
-                      <User className="w-4 h-4 text-white" />
-                    ) : (
-                      <Bot className="w-4 h-4 text-gray-600" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="whitespace-pre-line">{message.text}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
-                  </div>
-                </div>
+              <div>
+                <h3 className="font-semibold text-lg">Store Assistant</h3>
+                <p className="text-sm text-white/90">Online • Available</p>
               </div>
-            ))}
-            
-            {isTyping && (
-              <div className="chat-message bot animate-fade-in">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Chat Footer - Always Visible */}
-          <div className="chat-footer flex-shrink-0">
-            <div className="flex space-x-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                className="chat-input flex-1"
-                disabled={isTyping}
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isTyping}
-                className="chat-button"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Quick Action Buttons */}
-            <div className="flex space-x-2 mt-3">
-              <button
-                onClick={() => setInputValue('What discounts do you have?')}
-                className="discount-badge hover:bg-green-200 transition-colors cursor-pointer"
-              >
-                <Percent className="w-4 h-4 mr-1" />
-                Discounts
-              </button>
-              <button
-                onClick={() => setInputValue('Tell me about free gifts')}
-                className="gift-badge hover:bg-purple-200 transition-colors cursor-pointer"
-              >
-                <Gift className="w-4 h-4 mr-1" />
-                Free Gifts
-              </button>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Chat Body */}
+        <div className="chat-body flex-1 overflow-y-auto">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                'chat-message animate-slide-up',
+                message.sender === 'user' ? 'user' : 'bot'
+              )}
+            >
+              <div className="flex items-start space-x-2">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                  {message.sender === 'user' ? (
+                    <User className="w-4 h-4 text-white" />
+                  ) : (
+                    <Bot className="w-4 h-4 text-gray-600" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="whitespace-pre-line">{message.text}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {message.timestamp.toLocaleTimeString([], { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {isTyping && (
+            <div className="chat-message bot animate-fade-in">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-gray-600" />
+                </div>
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Chat Footer - Always Visible */}
+        <div className="chat-footer flex-shrink-0">
+          <div className="flex space-x-2">
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message here... (Shift+Enter for new line)"
+              className="chat-input flex-1 resize-none"
+              disabled={isTyping}
+              rows={1}
+              style={{ minHeight: '48px', maxHeight: '120px' }}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isTyping}
+              className="chat-button"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {/* Quick Action Buttons */}
+          <div className="flex space-x-2 mt-3">
+            <button
+              onClick={() => setInputValue('What discounts do you have?')}
+              className="discount-badge hover:bg-green-200 transition-colors cursor-pointer"
+            >
+              <Percent className="w-4 h-4 mr-1" />
+              Discounts
+            </button>
+            <button
+              onClick={() => setInputValue('Tell me about free gifts')}
+              className="gift-badge hover:bg-purple-200 transition-colors cursor-pointer"
+            >
+              <Gift className="w-4 h-4 mr-1" />
+              Free Gifts
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
