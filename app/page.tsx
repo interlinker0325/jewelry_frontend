@@ -7,9 +7,6 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Chatbot Demo
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Click the chat button in the bottom-right corner to start chatting
-        </p>
       </div>
       
       {/* Chatbot Component */}
