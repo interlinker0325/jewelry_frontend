@@ -179,7 +179,7 @@ const Chatbot: React.FC = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message here... (Shift+Enter for new line)"
+              placeholder="Type your message here..."
               className="chat-input flex-1 resize-none"
               disabled={isTyping}
               rows={1}
