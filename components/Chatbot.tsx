@@ -16,7 +16,7 @@ const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '👋 Hello! Welcome to our store! I\'m here to help you find the perfect products and offer exclusive deals.',
+      text: '👋 Hello! Welcome! I\'m here to help you with any questions.',
       sender: 'bot',
       timestamp: new Date()
     },
@@ -136,9 +136,9 @@ const Chatbot: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="chat-window animate-bounce-in">
+        <div className="chat-window animate-bounce-in flex flex-col">
           {/* Chat Header */}
-          <div className="chat-header">
+          <div className="chat-header flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -160,7 +160,7 @@ const Chatbot: React.FC = () => {
           </div>
 
           {/* Chat Body */}
-          <div className="chat-body scrollbar-hide">
+          <div className="chat-body flex-1 overflow-y-auto">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -208,8 +208,8 @@ const Chatbot: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Chat Footer */}
-          <div className="chat-footer">
+          {/* Chat Footer - Always Visible */}
+          <div className="chat-footer flex-shrink-0">
             <div className="flex space-x-2">
               <input
                 ref={inputRef}
