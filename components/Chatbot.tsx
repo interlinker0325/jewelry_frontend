@@ -18,18 +18,6 @@ const Chatbot: React.FC = () => {
       text: '👋 Hello! Welcome! I\'m here to help you with any questions.',
       sender: 'bot',
       timestamp: new Date()
-    },
-    {
-      id: '2',
-      text: '🎁 Special Offer: Get 20% off your first order with code WELCOME20!',
-      sender: 'bot',
-      timestamp: new Date()
-    },
-    {
-      id: '3',
-      text: '💝 Free gift with orders over $50! Limited time only.',
-      sender: 'bot',
-      timestamp: new Date()
     }
   ])
   const [inputValue, setInputValue] = useState('')
