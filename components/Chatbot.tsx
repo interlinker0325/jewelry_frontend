@@ -27,6 +27,12 @@ interface BackendResponse {
   success: boolean
 }
 
+interface NegotiationResponse {
+  message: string
+  redirect_url?: string
+  success: boolean
+}
+
 const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -121,6 +127,37 @@ const Chatbot: React.FC = () => {
     }
   }
 
+  const sendMessageToNegotiationBackend = async (userMessage: string): Promise<string> => {
+    try {
+      const response = await axios.post('https://backend/negotiable', {
+        user_message: userMessage,
+        timestamp: new Date().toISOString()
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (response.status === 200) {
+        const negotiationResponse: NegotiationResponse = response.data
+        
+        // Handle redirect if provided
+        if (negotiationResponse.redirect_url) {
+          console.log('Redirecting to:', negotiationResponse.redirect_url)
+          // You can implement the redirect logic here
+          // window.location.href = negotiationResponse.redirect_url
+        }
+        
+        return negotiationResponse.message
+      } else {
+        throw new Error('Failed to get response from negotiation backend')
+      }
+    } catch (error) {
+      console.error('Error sending message to negotiation backend:', error)
+      return 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.'
+    }
+  }
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
 
@@ -135,17 +172,33 @@ const Chatbot: React.FC = () => {
     setInputValue('')
     setIsTyping(true)
 
-    // Simulate bot response
-    setTimeout(() => {
+    try {
+      // Send user message to negotiation backend
+      const botResponseText = await sendMessageToNegotiationBackend(inputValue)
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateBotResponse(inputValue),
+        text: botResponseText,
         sender: 'bot',
         timestamp: new Date()
       }
+      
       setMessages(prev => [...prev, botResponse])
+    } catch (error) {
+      console.error('Error in negotiation:', error)
+      
+      // Fallback response if negotiation fails
+      const fallbackResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.',
+        sender: 'bot',
+        timestamp: new Date()
+      }
+      
+      setMessages(prev => [...prev, fallbackResponse])
+    } finally {
       setIsTyping(false)
-    }, 1000 + Math.random() * 2000)
+    }
   }
 
   const generateBotResponse = (userInput: string): string => {
