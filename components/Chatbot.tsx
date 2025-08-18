@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { X, Send, Gift, Percent, ShoppingBag, User, Bot } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import axios from 'axios'
 
 interface Message {
   id: string
@@ -40,7 +41,7 @@ const Chatbot: React.FC = () => {
     }
   }, [])
 
-  // Send current URL to backend when chatbot first renders
+  // Send current URL to custom backend when chatbot first renders
   useEffect(() => {
     if (!isInitialized) {
       sendCurrentUrlToBackend()
@@ -63,22 +64,20 @@ const Chatbot: React.FC = () => {
         referrer: document.referrer || null
       }
 
-      // Send to your backend endpoint
-      const response = await fetch('/api/chatbot/url', {
-        method: 'POST',
+      // Send to your custom backend
+      const response = await axios.post('https://python', urlData, {
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(urlData)
+        }
       })
 
-      if (response.ok) {
-        console.log('URL sent to backend successfully')
+      if (response.status === 200) {
+        console.log('URL sent to custom backend successfully')
       } else {
-        console.error('Failed to send URL to backend')
+        console.error('Failed to send URL to custom backend')
       }
     } catch (error) {
-      console.error('Error sending URL to backend:', error)
+      console.error('Error sending URL to custom backend:', error)
     }
   }
 
