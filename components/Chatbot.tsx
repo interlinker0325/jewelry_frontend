@@ -93,7 +93,7 @@ const Chatbot: React.FC = () => {
       }
 
       // Send to your custom backend
-      const response = await axios.post('https://python', urlData, {
+      const response = await axios.post('localhost:8000/price', urlData, {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -129,9 +129,11 @@ const Chatbot: React.FC = () => {
 
   const sendMessageToNegotiationBackend = async (userMessage: string): Promise<string> => {
     try {
-      const response = await axios.post('https://backend/negotiable', {
-        user_message: userMessage,
-        timestamp: new Date().toISOString()
+      const response = await axios.post('localhost:8000/negotiable', {
+        messages : userMessage,
+        productName: priceData?.title,
+        initialPrice : priceData?.price,
+        id : priceData?.variant_id,
       }, {
         headers: {
           'Content-Type': 'application/json',
